@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{ecs::system, prelude::*};
 
 mod bubble;
 mod mouth;
@@ -22,8 +22,8 @@ fn main() {
                 system_setup::setup,
                 bubble::spawn_bubble,
                 mouth::spawn_mouth,
-            )
-                .chain(),
+            ).chain(),
         )
+        .add_systems(Update, system_setup::test_cam)
         .run();
 }
