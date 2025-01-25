@@ -1,3 +1,23 @@
+EMCC_FLAGS :=   -Os                        					\
+				-O2                        					\
+				-s USE_GLFW=3              					\
+				-s ALLOW_MEMORY_GROWTH=1   					\
+				-s TOTAL_MEMORY=16777216   					\
+				-s USE_PTHREADS=1          					\
+				-s WASM=0                  					\
+				-s ASYNCIFY                					\
+				-s FORCE_FILESYSTEM=1      					\
+				-s ASSERTIONS=1            					\
+				-s GL_ENABLE_GET_PROC_ADDRESS 				\
+				--profiling                					\
+		 		-s USE_GLFW=3								\
+				-s LLD_REPORT_UNDEFINED						\
+				-DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2	\
+				-DPLATFORM_WEB								\
+				-Wno-enum-compare 							\
+
+
+
 all:
 	@mkdir -p bin
 	g++ \
@@ -12,6 +32,9 @@ all:
 		-I ./third_party/ \
 		-Wno-enum-compare
 
+run:
+	./bin/bubliss
+
 web:
 	@mkdir -p bin_web
 	emcc \
@@ -25,12 +48,8 @@ web:
 		-I include \
 		-I ./third_party/raylib-5.5_webassembly/include \
 		-I ./third_party/ \
-		-s USE_GLFW=3 \
-		-s LLD_REPORT_UNDEFINED \
-		-DPLATFORM_WEB -DGRAPHICS_API_OPENGL_ES2 \
-		-DPLATFORM_WEB \
 		-o bin_web/bubliss.html \
-		-Wno-enum-compare
+		${EMCC_FLAGS} \
 
 run_web:
-	cd bin_web && emrun bubliss.html
+	cd bin_web && emrun index.html

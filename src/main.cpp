@@ -9,11 +9,10 @@
 #include "scene.hpp"
 
 #if defined(PLATFORM_WEB)
-    #include <emscripten/emscripten.h>
+#include <emscripten/emscripten.h>
 #endif
 
-
-void step(){
+void step() {
     auto &state = GlobalState::inst();
     state.window_width = GetScreenWidth();
     state.window_height = GetScreenHeight();
@@ -21,7 +20,6 @@ void step(){
     GameplaySystem::update();
     RenderingSystem::render();
 }
-
 
 int main(void) {
     auto &state = GlobalState::inst();
@@ -32,6 +30,9 @@ int main(void) {
     SetTraceLogLevel(TraceLogLevel::LOG_ERROR);
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(state.window_width, state.window_height, "Bubbliss");
+
+    RenderingSystem::init();
+
 
 #if defined(PLATFORM_WEB)
     emscripten_set_main_loop(step, 0, 1);

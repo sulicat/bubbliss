@@ -1,20 +1,30 @@
 #include "rendering_system.hpp"
 #include <iostream>
+#include <math.h>
 
+#include "PerlinNoise.hpp"
 #include "raylib.h"
 
 #define RAYGUI_IMPLEMENTATION
 #include "raygui.h"
 
-void RenderingSystem::render() {
+#define TO_RAD ((2 * M_PI) / 360.0)
 
+const siv::PerlinNoise::seed_type seed = 123456u;
+const siv::PerlinNoise            perlin{seed};
+
+void RenderingSystem::init() {
+}
+
+void RenderingSystem::render() {
     GlobalState &state = GlobalState::inst();
     Scene       &scene = Scene::inst();
     Bubble      &bubble = scene.get_bubble();
+    float        win_w = state.window_width;
+    float        win_h = state.window_height;
 
-    ClearBackground(Color{255, 0, 255, 0});
+    ClearBackground(Color{0, 0, 0, 0});
     BeginDrawing();
-
 
     switch (state.game_state) {
     case GameState::BASE:
@@ -27,17 +37,51 @@ void RenderingSystem::render() {
         break;
     }
 
-    if (GuiButton((Rectangle){24, 24, 120, 30}, "#Show Message")) {
+    if (GuiButton(Rectangle{24, 24, 120, 30}, "#Show Message")) {
         std::cout << "Message\n";
     }
 
     EndDrawing();
 }
 
-void RenderingSystem::render_base_scene(){
+void RenderingSystem::render_base_scene() {
+    GlobalState &state = GlobalState::inst();
+    float        win_w = state.window_width;
+    float        win_h = state.window_height;
 
+    render_bubble(win_w / 2, win_h / 2, win_w * 0.1);
 }
 
-void RenderingSystem::render_moving_scene(){
+void RenderingSystem::render_moving_scene() {
+}
 
+void RenderingSystem::render_bubble(float x, float y, float r) {
+    Scene       &scene = Scene::inst();
+    Bubble      &bubble = scene.get_bubble();
+    GlobalState &state = GlobalState::inst();
+
+    static int ni = 0;
+    ni += bubble.volatility;
+
+    Vector2 center = Vector2{x, y};
+    float   angle_step = 360.0 / bubble.resolution;
+
+    for (int i = 0; i < bubble.resolution; i++) {
+        float a1 = i * angle_step;
+        float a2 = (i + 1) * angle_step;
+        float a1_rad = TO_RAD * a1;
+        float a2_rad = TO_RAD * a2;
+
+        float nscale = sin(float(ni/100.0)) + 1.0; 
+        float noise = perlin.octave2D_01( sin(a1_rad), cos(a1_rad)*(nscale), 4);
+        float wiggle_r = r + (noise * r * 0.1);
+
+        Vector2 p1 = Vector2{wiggle_r * sin(a1_rad) + center.x,
+                             wiggle_r * cos(a1_rad) + center.y};
+
+        Vector2 p2 = Vector2{wiggle_r * sin(a2_rad) + center.x,
+                             wiggle_r * cos(a2_rad) + center.y};
+
+        DrawTriangle(center, p1, p2, Color{255, 0, 0, 255});
+    }
 }
