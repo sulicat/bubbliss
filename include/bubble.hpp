@@ -10,7 +10,8 @@ public:
     float x = 0;
     float y = 0;
     float size = 0;
-    float volatility = 1;
+    float volatility = 0.01;
+    float volatility_amp = 5;
 
 private:
 };

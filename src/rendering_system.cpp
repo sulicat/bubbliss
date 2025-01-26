@@ -49,7 +49,7 @@ void RenderingSystem::render_base_scene() {
     float        win_w = state.window_width;
     float        win_h = state.window_height;
 
-    render_bubble(win_w / 2, win_h / 2, win_w * 0.1);
+    render_bubble(win_w / 2, win_h / 2, win_h * 0.5);
 }
 
 void RenderingSystem::render_moving_scene() {
@@ -60,11 +60,11 @@ void RenderingSystem::render_bubble(float x, float y, float r) {
     Bubble      &bubble = scene.get_bubble();
     GlobalState &state = GlobalState::inst();
 
-    static int ni = 0;
-    ni += bubble.volatility;
-
     Vector2 center = Vector2{x, y};
     float   angle_step = 360.0 / bubble.resolution;
+
+    static float noise_i = 0;
+    noise_i += 0.1;
 
     for (int i = 0; i < bubble.resolution; i++) {
         float a1 = i * angle_step;
@@ -72,15 +72,14 @@ void RenderingSystem::render_bubble(float x, float y, float r) {
         float a1_rad = TO_RAD * a1;
         float a2_rad = TO_RAD * a2;
 
-        float nscale = sin(float(ni/100.0)) + 1.0; 
-        float noise = perlin.octave2D_01( sin(a1_rad), cos(a1_rad)*(nscale), 4);
-        float wiggle_r = r + (noise * r * 0.1);
+        float p1_x = r * sin(a1_rad) + center.x;
+        float p1_y = r * cos(a1_rad) + center.y;
+        float p2_x = r * sin(a2_rad) + center.x;
+        float p2_y = r * cos(a2_rad) + center.y;
 
-        Vector2 p1 = Vector2{wiggle_r * sin(a1_rad) + center.x,
-                             wiggle_r * cos(a1_rad) + center.y};
 
-        Vector2 p2 = Vector2{wiggle_r * sin(a2_rad) + center.x,
-                             wiggle_r * cos(a2_rad) + center.y};
+        Vector2 p1 = Vector2{p1_x, p1_y};
+        Vector2 p2 = Vector2{p2_x, p2_y};
 
         DrawTriangle(center, p1, p2, Color{255, 0, 0, 255});
     }
